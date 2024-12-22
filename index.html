@@ -83,7 +83,7 @@ body {
 
 a{
     text-decoration: none;
-  color: green;
+  
 }
 
 
@@ -107,7 +107,15 @@ background-color: lightgrey;
     font-family: Sans-Serif;
     font: bold;
     }
-
+.subnav {
+background-color: teal;
+    padding: 5px 12px;
+    color: white;
+    border-radius: 10px;
+    width: 100%;
+    font-family: Sans-Serif;
+    font: bold;
+}
 .textarea{
   background-color: whitesmoke;
 padding-top: 30px;
@@ -124,7 +132,10 @@ padding-right: 20px;
   top: 40px;
   bottom: 0;
 }
-
+    .navigation {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
 #Settings{
   background-color: whitesmoke;
@@ -543,13 +554,11 @@ input:checked + .slider:before {
 
 
 .send{
-    background: transparent;
-    color: green;
+    
+    color: white;
     padding: 10px 12px;
-    border-radius: 20px;
-    border: 1px solid green;
-    margin-right: 30%;
-    margin-left: 30%;
+    border-radius: 10px;
+    width: 80%;
 }
 
 .day{
@@ -592,7 +601,7 @@ input:checked + .slider:before {
 
 	
 </head>
-<body onload="Reminder()">
+<body onload="Reminder(); findTotal(); findBs()">
   <div id="preloader" onload="Pre()" class="preloader">
     <h3 class="text">My Report</h3>
   </div>
@@ -604,14 +613,22 @@ input:checked + .slider:before {
     document.getElementById("main").style.display="block";
   },2000)
 </script>
+
+
   <div id="main" style="display:none;">
 	 <div id="nav">
         <a style="color:black;">My Report</a>
        <a id="navDemo" style="color: whitesmoke;position: absolute;right: 20px;"></a>
     </div>
 
-<br> 
+<br/>
+<br />
 
+<div class="subnav">
+    
+    <p id="target"></p>
+</div>
+<br />
 
 <script type="text/javascript">
   function Help(){
@@ -619,14 +636,104 @@ input:checked + .slider:before {
   }
 </script>
 
+
+
+
+
 <p id="not">Nothing to show<br><br><a style="color:orange;" onclick="      document.getElementById('Settings').style.display='block'">Setup</a></p>
 <div id="contentmenu">
 <div class="day">
     <br />
-<input type="date" style="background-color:whitesmoke;border:none;border-radius:20px;padding:10px 12px;width:120px;color:black;"/>
+
+  <div class="navigation">
+    <button id="prevMonth">Previous Month</button>
+    <span id="monthDisplay"></span>
+    <button id="nextMonth">Next Month</button>
+  </div>
+  <table id="calendar" style="width: 100%;text-align: center;border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th>Sun</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const daysInMonth = (month, year) => new Date(year, month, 0).getDate();
+    const getFirstDayOfMonth = (month, year) => new Date(year, month - 1, 1).getDay();
+
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth(); // 0-based index
+    let currentYear = currentDate.getFullYear();
+
+    function renderCalendar(month, year) {
+      const monthDisplay = document.getElementById("monthDisplay");
+      const calendarBody = document.querySelector("#calendar tbody");
+
+      monthDisplay.textContent = `${monthNames[month]} ${year}`;
+      calendarBody.innerHTML = ""; // Clear the existing calendar
+
+      const firstDay = getFirstDayOfMonth(month + 1, year);
+      const daysInCurrentMonth = daysInMonth(month + 1, year);
+      
+      let row = document.createElement("tr");
+
+      // Add empty cells for the days before the first day of the month
+      for (let i = 0; i < firstDay; i++) {
+        row.appendChild(document.createElement("td"));
+      }
+
+      // Add the days of the month
+      for (let day = 1; day <= daysInCurrentMonth; day++) {
+        if (row.children.length === 7) {
+          calendarBody.appendChild(row);
+          row = document.createElement("tr");
+        }
+        const cell = document.createElement("td");
+        cell.textContent = day;
+        row.appendChild(cell);
+      }
+
+      // Append the last row
+      calendarBody.appendChild(row);
+    }
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      if (currentMonth === 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else {
+        currentMonth--;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      if (currentMonth === 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else {
+        currentMonth++;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
+
+    renderCalendar(currentMonth, currentYear);
+  </script>
 <h3 id="demo"></h3>
 </div>
 <br />
+
+
+
 
 <script>
 const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -655,7 +762,10 @@ function Reminder(){
  if(document.getElementById("checkbox1zaal1").checked == true){
      
      document.getElementById("contentmenu").style.display="block"
-     document.getElementById("not").style.display="none"
+     document.getElementById("not").style.display="none";
+     
+     
+     document.getElementById("target").innerHTML=`Pioneers: 50hrs;<br/> Aux Pioneer: 30hrs`
  }
  else{
      document.getElementById("contentmenu").style.display="none"
@@ -685,15 +795,16 @@ const month = ["January","February","March","April","May","June","July","August"
   var isFired = localStorage.getItem('checkFired');
 
   if (isFired != '1'){
-      var name=prompt("Hi, what is your name? eg:John")
-      alert("Welcome" + " "+ name +"! It seems this is your first time visiting this page. We make sure we provide the best for you. This page is a user_friendly page.\n Enjoy your day.");
+      var name=prompt("Please enter your name. eg:John")
+      localStorage.setItem('fsnam', name)
+      alert("Welcome" + " "+ name +"! It seems this is your first time visiting this page. We provide the best for our users. We hope this program helps you effectively.\n Enjoy your day.");
       alert("Click on 'Settings' on the bottom menu to setup the page")
       document.getElementById("Settings").style.display="block"
       localStorage.setItem('checkFired', '1');
       
       
       if(isFired == "John"){
-          alert("yyy")
+          alert("...")
       }
   }
   
@@ -775,11 +886,13 @@ if(day == 16){
  var id= document.getElementById("16");
   id.style.color="orange";
  id.style.display="table-row"
+
 }
 
 if(day == 17){
  var id= document.getElementById("17");
   id.style.color="orange";
+
  id.style.display="table-row"
 }
 
@@ -800,6 +913,7 @@ if(day == 20){
  var id= document.getElementById("20");
   id.style.color="orange";
  id.style.display="table-row"
+ 
 }
 
 if(day == 21){
@@ -869,14 +983,50 @@ if(day == 30){
  var id= document.getElementById("31");
   id.style.color="orange";
  id.style.display="table-row"
-      for(var i = 0; i < 2; i++){
-    alert("The month has ended.");
-      };
-   alert("Please you can send your report now.")
+ var dye=new Date();
+
+const monthdata = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let month = monthdata[dye.getMonth()];
+   var year=dye.getFullYear();
+
+    var hrstot=document.getElementById("hrs-total").value;
+    var bstot=document.getElementById("bs-total").value;
+
+alert("The month has ended")
+
+   const sendy= prompt("Please select an option \n 1. Send report via Sms\n 2. Send report via whatsApp\n 3. Send report via email");
+
+   if(sendy == 1){
+    const message = `Total_Report for ${month} ${year}\n\n HRS: ${hrstot};\n\n Bible Studies: ${bstot};`
+
+     var phoneNumber=prompt("Enter Phone Number");
+     
+        window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+   }
+      if(sendy == 2){
+
+    var watext=`Total_Report for ${month} ${year}\n\n\n Hours: ${hrstot};\n Bible_Studies: ${bstot};`
+    
+    window.location.href=`https://api.whatsapp.com/send?phone=&text=${watext}`
+      }    
+
+
+      if(sendy == 3){
+        var recmail=prompt("Enter recipient email. eg:example@gmail.com")
+        var mailtext=`Total_Report for ${month} ${year}
+&body=Hours: ${hrstot},\n Bible Studies:${bstot} ;`
+
+if(recmail){
+  window.location.href=`mailto:${recmail}?subject=${mailtext}`
+}
+      }
+  
+    
   }
 
-  else if(months == "November" && day == 1 && year == 2023){
-      alert('New update.')
+  else if(months == "January" && day == 1 && year == 2025){
+      alert('New year.')
   }
   
   if(day ==1){
@@ -884,29 +1034,56 @@ if(day == 30){
   id.style.color="orange";
  id.style.display="table-row"
       alert('Akwaaba! New month.');
-  var conf = confirm("Would you like to clear all data to get a new page for the new month.?");
-    if(conf == true){
-      var subconf = confirm("Are you sure you want to clear your saves?");
-      if(subconf== true){
-          localStorage.clear();
-          alert("Your data is cleared successfully.")
-          window.location.reload()
-      }
+
+  var conf = confirm("We would like to clear your old data to get a new page for the new month.?");
+      if(conf== true){
+          
+       const datakeys=["hrs","hrs2","hrs3","hrs4","hrs5","hrs6","hrs7","hrs8","hrs9","hrs10","hrs11","hrs12","hrs13","hrs14","hrs15","hrs16","hrs17","hrs18","hrs19","hrs20","hrs21","hrs22","hrs23","hrs24","hrs25","hrs26","hrs27","hrs28","hrs29","hrs30","hrs31","bs","bs2","bs3","bs4","bs5","bs6","bs7","bs8","bs9","bs10","bs11","bs12","bs13","bs14","bs15","bs16","bs17","bs18","bs19","bs20","bs21","bs22","bs23","bs24","bs25","bs26","bs27","bs28","bs29","bs30","bs31"];
+       datakeys.forEach(key =>{
+           localStorage.removeItem(key)
+       })
+          alert("We have setup a new page for you.")
+      
     }
   }
-  else if(months == "September","April","June","November" && day == 30){
-      for(var i = 0; i < 2;i++){
-    alert("The month has ended.");
+  else if(months == "September" && day == 30 || months == "April" && day == 30|| months == "June" && day == 30|| months == "November" && day == 30){
+     
+ var dd=new Date();
+
+const monthdata = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let month = monthdata[dd.getMonth()];
+   var year=dd.getFullYear();
+
+    var hrstot=document.getElementById("hrs-total").value;
+    var bstot=document.getElementById("bs-total").value;
+
+alert("The month has ended")
+
+   const sendy= prompt("Please select an option \n 1. Send report via Sms\n 2. Send report via whatsApp\n 3. Send report via email");
+
+   if(sendy == 1){
+    const message = `Total_Report for ${month} ${year}\n\n HRS: ${hrstot};\n\n Bible Studies: ${bstot};`
+
+     var phoneNumber=prompt("Enter Phone Number");
+     
+        window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
+   }
+      if(sendy == 2){
+
+    var watext=`Total_Report for ${month} ${year}\n\n\n Hours: ${hrstot};\n Bible_Studies: ${bstot};`
+    window.location.href=`https://api.whatsapp.com/send?phone=&text=${watext}`
+      }    
+
+
+      if(sendy == 3){
+        var recmail=prompt("Enter recipient email. eg:example@gmail.com")
+        var mailtext=`Total_Report for ${month} ${year}
+&body=Hours: ${hrstot},\n Bible Studies:${bstot} ;`
+
+  window.location.href=`mailto:${recmail}?subject=${mailtext}`
       }
-      var conf = confirm("Would you like to clear all data to get a new page for the new month.?");
-    if(conf == true){
-      var subconf = confirm("Are you sure you want to clear your saves?");
-      if(subconf== true){
-          localStorage.clear();
-          alert("Your data is cleared successfully.")
-          window.location.reload()
-      }
-    }
+     
   }
 
  
@@ -1508,16 +1685,27 @@ document.getElementById("dialog").style.display="none";
 
 <br><br>
 
+
+
 <script type="text/javascript">
   
 
 function Clear(){
     var result = confirm("Your data will be permanently deleted. You cannot retrieve back your data.");
 
-   if(result == true){
+   if(result){
+       var agree=prompt("Type: \n\n delete data")
+       if(agree == 'delete data'){
+       const datakeys=["hrs","hrs2","hrs3","hrs4","hrs5","hrs6","hrs7","hrs8","hrs9","hrs10","hrs11","hrs12","hrs13","hrs14","hrs15","hrs16","hrs17","hrs18","hrs19","hrs20","hrs21","hrs22","hrs23","hrs24","hrs25","hrs26","hrs27","hrs28","hrs29","hrs30","hrs31","bs","bs2","bs3","bs4","bs5","bs6","bs7","bs8","bs9","bs10","bs11","bs12","bs13","bs14","bs15","bs16","bs17","bs18","bs19","bs20","bs21","bs22","bs23","bs24","bs25","bs26","bs27","bs28","bs29","bs30","bs31"]
+       datakeys.forEach(key =>{
+           localStorage.removeItem(key)
+       })
     alert("Your data is permanently deleted!");
-    localStorage.clear();
+    
     window.location.reload()
+       
+       
+   }
    }
 
 };
@@ -1526,31 +1714,73 @@ function Clear(){
 // document.body.appendChild(para);
 </script>
 <br>
+<center>
 
-    <button class="send" id="send-sms">Send Report via SMS</button>
+    <button class="send" style="background-color:orange;border:none" id="send-sms" onclick="Sendsms()">Send Report via SMS</button>
 <br />
 <br />
-<button class="send"><a href="https://api.whatsapp.com/send?phone=&text=Total_Report Bible-Studies: ,Hours:">Send Report via Whatsapp</a>
+
+<button class="send" style="background-color:green;border:none; color:white"><a onclick="Sendwa()" id='sendwa'>Send Report via Whatsapp</a>
 </button>
 <br />
 <br />
-<button class="send">
-<a href="mailto:email@example.com?subject=Total_Report
-&body=Bible-Studies: ,Hours: ,
-">Send Report via Email</a>
+<button class="send" style="background-color:orangered;border:none; color:white">
+<a id="sendmail" onclick="Sendmail()">Send Report via Email</a>
 </button>
-  
+ </center>
     <script>
-      const button = document.getElementById("send-sms");
-      const phoneNumber = "";
-     var hrs = document.getElementById("hrs-total").value;
-      const message = "Total_Report\n\n HRS:" + hrs + ",\nBible-Studies:  ";
+    
 
-      button.addEventListener("click", () => {
+function Sendwa(){
+   var d=new Date();
+
+const monthdata = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let month = monthdata[d.getMonth()];
+   var year=d.getFullYear();
+    var hrstot=document.getElementById("hrs-total").value;
+    var bstot=document.getElementById("bs-total").value;
+    var watext=`Total_Report for ${month} ${year}\n\n\n Hours: ${hrstot};\n Bible_Studies: ${bstot};`
+    document.getElementById("sendwa").href=`https://api.whatsapp.com/send?phone=&text=${watext}`
+}
+
+function Sendmail(){
+   var d=new Date();
+
+const monthdata = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let month = monthdata[d.getMonth()];
+   var year=d.getFullYear();
+    var hrstot=document.getElementById("hrs-total").value;
+    var bstot=document.getElementById("bs-total").value;
+
+  var mailtext=`Total_Report for ${month} ${year}
+&body=Hours: ${hrstot},\n Bible Studies:${bstot} ;`
+var rmail=prompt("Enter Recipient Mail  eg: example@gmail.com");
+if(rmail){
+
+  document.getElementById("sendmail").href=`mailto:${rmail}?subject=${mailtext}`
+}
+}
+
+function Sendsms(){
+       var d=new Date();
+const monthdata = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+let month = monthdata[d.getMonth()];
+   var year=d.getFullYear();
+    var hrstot=document.getElementById("hrs-total").value;
+    var bstot=document.getElementById("bs-total").value;
+    
+      const phoneNumber = prompt("Enter Phone Number");
+     
+      const message = `Total_Report for ${month} ${year}\n\n HRS: ${hrstot};\n\n Bible Studies: ${bstot};`
+
+     
         const link = document.createElement("a");
         link.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
         link.click();
-      });
+      };
     </script>
     
     <br />
@@ -1574,14 +1804,14 @@ function Clear(){
 <h6 class="h61">How it saves data</h6>
 <p style="font-size: 15px;">This platform is set to save your input to localstorage. These means when you clear your Browser's cache, it will affect the data.</p>
 <h6 class="h61">Restrictions</h6>
-<p>You may not use any part of the web page, software, or its data to write another website or software product, whether this is done in exchange for money or not. </p>
+<p>You may not use any part of the program, software, or its data to write another website or software product, whether this is done in exchange for money or not. </p>
 <h6 class="h61">How to use</h6>
 <p style="font-size: 15px;">You can change input names.</p>
-<p style="font-size: 15px;">The month uses your system date and time changes so make sure your date and time are set properly</p>
-<p style="font-size: 15px;">Your input is saved automatically, so no need for a save button</p>
-<p style="font-size: 15px;">To see all the input field click on the "Max" button.</p>
+<p style="font-size: 15px;">This program uses your system date and time, so make sure your date and time are set properly</p>
+<p style="font-size: 15px;">Your data are saved automatically</p>
+<p style="font-size: 15px;">To see all the input field, click on the "Max" button.</p>
 <p style="font-size: 15px;">Your input sum up automatically to the "Total_Report" respectively.</p>
-<p style="font-size: 15px;">You can also "Add Note" if needed.</p>
+<p style="font-size: 15px;">You can also use "Add Note" to type some note.</p>
 <p style="font-size: 15px;">In the "Total_Report" container, you can change the names in the input to your own choice. NB:Make sure the name in the Total_Report matches with the table's top names..</p>
 <p>By clicking the "clear all data" button , you agree to delete your data permanently from localstorage</p>
 <p>You can use clear all data button when you enter a new month</p>
@@ -1685,17 +1915,24 @@ function settings(){
     var st=document.getElementById("Settings")
     st.style.display="block"
 }
+
+
         </script>
         <div id="Settings" style="display:none;">
             <h4 style="text-align:left;color:orange;font-size:20px">Settings</h4>
             <small>Choose only one to setup the page. Remember to "save" changes</small>
      <br>
      <br><br>
-<input type="checkbox" id="checkbox1zaal1"><small>[Aux pioneer,pioneers etc. only]</a></input>
-     <br>
-     <br>
-<input type="checkbox" id="checkbox2">Publishers only</input>
-<br>
+     
+<small>Aux pioneer,pioneers etc. only</small>
+<input type="checkbox" id="checkbox1zaal1"/>
+     <br />
+     
+<small>Publishers only</small>
+<input type="checkbox" id="checkbox2"/>
+
+
+
         <input class="but" type="button" id="ReserveerButton1" value="save" onclick="saved()"/>
 </div>
   <div class="theme-switch-wrapper">
